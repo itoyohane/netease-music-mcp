@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.*
+*.log
+local-state/
+test-login-state/
+.netease-music-plugin/
+session.json
+login-*.png
+official-login-*/
+*.ncm
+*.mp3
+*.flac
+*.part
