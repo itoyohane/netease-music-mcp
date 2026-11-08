@@ -1,5 +1,13 @@
 # 网易云音乐 MCP
 
+简体中文 · [English](README.en.md)
+
+**一句话安装**：把下面这句话发给正在使用的 Codex、Claude Code、Cursor、Gemini CLI 或 VS Code Copilot（Agent 模式）。
+
+> 请按 https://github.com/itoyohane/netease-music-mcp/blob/main/INSTALL.md 为我在当前编程助手中安装网易云音乐 MCP，保留已有配置并验证 status 工具。
+
+助手需要能访问网络、运行终端和修改客户端配置。安装后再按需登录。[各客户端安装说明](INSTALL.md)
+
 让支持 MCP 的桌面助手在本机连接网易云音乐。你可以说「列出我今天的日推」「总结这个歌单里出现最多的五位歌手」，或「把这首歌下载到我指定的文件夹」。这是使用社区 API 的非官方项目。
 
 ## 快速开始
