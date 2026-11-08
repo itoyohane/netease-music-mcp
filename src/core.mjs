@@ -148,11 +148,30 @@ export class Music {
       statistics: summarize(songs, p.trackCount), more: next < (p.trackIds || []).length,
       next_offset: next, inaccessible_count: Math.max(0, p.trackCount - (p.trackIds || []).length)};
   }
-  async download({id, output_dir, quality = 'exhigh'}) {
-    const b = await this.call('song_download_url_v1', {id, level: quality});
-    const data = Array.isArray(b.data) ? b.data[0] : b.data;
-    if (!data?.url || (data.code && data.code !== 200) || data.freeTrialInfo) throw new Error('账号没有完整曲目的下载权限或曲目不可下载。');
+  async download({id, output_dir, quality = 'exhigh', playback_fallback = true}) {
+    const usable = data => data?.url && (!data.code || data.code === 200) &&
+      !data.freeTrialInfo && !data.freeTrialPrivilege?.resConsumable;
+    let data, primaryFailure, source = 'download';
+    try {
+      const b = await this.call('song_download_url_v1', {id, level: quality});
+      data = Array.isArray(b.data) ? b.data[0] : b.data;
+      if (!usable(data)) primaryFailure = `下载接口未提供完整曲目（code=${data?.code ?? b.code ?? 'unknown'}）`;
+    } catch (e) { primaryFailure = e.message; }
+    if (primaryFailure) {
+      if (!playback_fallback) throw new Error(`${primaryFailure}；未启用播放接口回退，请检查额度、权限或接口状态。`);
+      try {
+        const b = await this.call('downlist_player_url', {id, level: quality});
+        data = Array.isArray(b.data) ? b.data[0] : b.data;
+        if (!usable(data)) throw new Error('播放接口没有返回完整曲目，可能无权限或仅有试听。');
+        if (Number(data.id) !== id) throw new Error('播放接口返回的曲目 ID 不匹配。');
+        source = 'downlist_player';
+      } catch (e) { throw new Error(`${primaryFailure}；回退失败：${e.message}`); }
+    }
     const details = (await this.call('song_detail', {ids: String(id)})).songs?.[0];
+    if (source === 'downlist_player' && (!details?.dt || !Number.isFinite(data.time) ||
+      Math.abs(data.time - details.dt) > 2000)) {
+      throw new Error('播放接口返回的时长与原曲不符或缺失，未保存可能的试听片段。');
+    }
     const dir = await absoluteDir(output_dir);
     const temp = path.join(dir, `.download-${randomUUID()}.part`);
     try {
@@ -190,7 +209,8 @@ export class Music {
       const target = path.join(dir, `${name}.${type}`);
       await fs.copyFile(temp, target, 1); // COPYFILE_EXCL: preserve existing files.
       return {path: target, bytes: size, format: type, requested_quality: quality,
-        actual_bitrate: data.br, needs_ncm_conversion: type === 'ncm'};
+        actual_bitrate: data.br, needs_ncm_conversion: type === 'ncm',
+        source, ...(primaryFailure ? {primary_failure: primaryFailure} : {})};
     } finally { await fs.rm(temp, {force: true}); }
   }
   async convert_ncm({input_file, output_dir}) {

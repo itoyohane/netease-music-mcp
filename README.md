@@ -35,6 +35,8 @@ npm run doctor
 
 下载权限取决于账号和曲目。转换 NCM 时需将 [ncmdump](https://github.com/taurusxin/ncmdump/releases) 加入 PATH，或用 `NCMDUMP_PATH` 指向其可执行文件。输出沿用源音频的 MP3 或 FLAC 编码，原文件会保留。
 
+下载接口报错、额度受限或未返回完整曲目地址时，`download` 默认按 [DownList](https://github.com/xxxkjing/DownList) 的思路尝试网易云桌面播放接口。回退沿用本机登录和请求音质，校验歌曲 ID、试听标记与原曲时长（允许 2 秒误差），随后检查文件大小、MD5 和实际格式。它不重置账号额度，也不保证每首歌可用。传入 `playback_fallback: false` 可关闭回退。返回的 `source` 为 `download` 或 `downlist_player`；回退结果附带 `primary_failure`，便于批量任务准确汇总失败。
+
 ## 会话存储与开发
 
 登录工具为 `login_qr`、`login_check` 和 `login_browser`。会话和二维码默认保存在 `~/.netease-music-plugin`，可用 `NETEASE_STATE_DIR` 指定其他私有目录。Windows 使用 DPAPI 加密会话，其他平台通过文件权限限制为仅当前用户可读写。调用 `logout` 可清除已保存的会话。

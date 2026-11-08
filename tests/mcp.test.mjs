@@ -18,6 +18,7 @@ test('real SDK handshake, 11 tools, harmless status and validation', async () =>
     const {tools} = await client.listTools();
     assert.equal(tools.length, 11);
     assert.ok(tools.some(tool => tool.name === 'login_browser'));
+    assert.equal(tools.find(tool => tool.name === 'download').inputSchema.properties.playback_fallback.default, true);
     const result = await client.callTool({name: 'status', arguments: {}});
     assert.equal(JSON.parse(result.content[0].text).logged_in, false);
     const daily = await client.callTool({name: 'daily', arguments: {}});

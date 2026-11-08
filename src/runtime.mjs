@@ -6,4 +6,5 @@ console.warn = () => {};
 console.error = () => {};
 const {default: api} = await import('@neteasecloudmusicapienhanced/api');
 const {Music} = await import('./core.mjs');
-export const music = new Music(api);
+const {playerUrl} = await import('./player-url.mjs');
+export const music = new Music({...api, downlist_player_url: playerUrl});

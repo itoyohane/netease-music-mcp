@@ -31,7 +31,7 @@ test('playlist fetches IDs beyond preview and reports missing tracks', async () 
 });
 test('authentication and paid download failures do not create outputs', async () => {
   const m = new Music({song_download_url_v1: async () => ({body: {code: 200, data: {url: null}}})}, {cookie: 'test'});
-  await assert.rejects(m.download({id: 1, output_dir: 'unused'}), /权限/);
+  await assert.rejects(m.download({id: 1, output_dir: 'unused', playback_fallback: false}), /权限/);
   await assert.rejects(new Music({}, {cookie: ''}).daily(), /登录/);
 });
 test('download verifies bytes, does not overwrite, and removes partial files', async () => {

@@ -35,6 +35,8 @@ Ask the assistant to show a login QR code. Scan it in the NetEase Cloud Music mo
 
 Downloads require permission for the selected track. For NCM conversion, install [ncmdump](https://github.com/taurusxin/ncmdump/releases) on PATH or set `NCMDUMP_PATH` to the executable. The output retains the original MP3 or FLAC encoding and the source file stays in place.
 
+If the download endpoint fails or does not provide a complete-track URL, `download` automatically tries the NetEase desktop player endpoint using the approach described by [DownList](https://github.com/xxxkjing/DownList). It reuses the local session and requested quality, rejects trials, checks the track ID and duration (within two seconds), then verifies file size, MD5 and actual format. This does not reset account quotas or guarantee availability. Set `playback_fallback: false` to disable it. Results expose `source` (`download` or `downlist_player`) and, when applicable, `primary_failure` for batch reporting.
+
 ## Session storage and development
 
 Login tools are `login_qr`, `login_check` and `login_browser`. The session and QR images live in `~/.netease-music-plugin`; set `NETEASE_STATE_DIR` to choose a different private directory. Windows encrypts the session using DPAPI. Other platforms use owner-only file permissions. Use `logout` to clear the saved session.
