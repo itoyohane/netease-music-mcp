@@ -2,15 +2,15 @@
 
 [简体中文](README.md) · English
 
-Connect a local coding assistant to NetEase Cloud Music. Search for a specific recording, list daily recommendations, analyze playlists, download tracks available to your account, or extract audio from local NCM files. This unofficial project uses the community [NetEase Cloud Music API](https://github.com/NeteaseCloudMusicApiEnhanced/api-enhanced).
+Ask your coding assistant to find a particular recording, pull today's recommendations, or tell you which artists appear most in a playlist. This unofficial MCP server runs on your computer, so it can also save an authorized download or convert a local NCM file in the folder you choose.
 
-## Install with one prompt
+## Install from chat
 
-Paste this into Codex, Claude Code, Cursor, Gemini CLI, or VS Code Copilot in agent mode:
+With Git and Node.js 22+ installed, paste this into Codex, Claude Code, Cursor, Gemini CLI or VS Code Copilot in agent mode:
 
-> Install https://github.com/itoyohane/netease-music-mcp for my current coding assistant using its INSTALL.md, preserve existing settings, and verify the status tool.
+> Follow https://github.com/itoyohane/netease-music-mcp/blob/main/INSTALL.md to install netease-music for my current assistant, preserve existing settings, and call its status tool to verify the connection.
 
-The assistant needs network access, a terminal, and permission to configure the client. For manual setup, install Git and Node.js 22 or later:
+For manual installation, run these commands and [register the server in your client](INSTALL.md).
 
 ```sh
 git clone https://github.com/itoyohane/netease-music-mcp.git
@@ -19,22 +19,24 @@ npm ci --ignore-scripts
 npm run doctor
 ```
 
-Register Node and the absolute path to `src/server.mjs` as a local stdio server using the [client-specific instructions](INSTALL.md).
+> [!TIP]
+> A successful call to `status` from your assistant confirms the connection. If `logged_in` is false, try “Find Ten Years by Eason Chan and show me the album.” Search works before sign-in.
 
-## Try it
+## Use your music account
 
-| Ask your assistant | Tools |
+Ask the assistant to show a login QR code. Scan it in the NetEase Cloud Music mobile app, confirm on your phone, then ask the assistant to check the result. On Windows you can also sign in through a separate Edge or Chrome window.
+
+| Try asking | Tools |
 | --- | --- |
-| “Search for Ten Years by Eason Chan and show the album for each match.” | `search` works before login. |
-| “Show my login QR code and check it after I scan.” | `login_qr`, `login_check`, `status`. Scan and confirm in the mobile music app. Windows users can also use `login_browser` with Edge or Chrome. |
-| “List today's recommendations in their original order.” | `daily` uses the signed-in account and labels the date in China Standard Time. |
-| “Read every page of my commute playlist and summarize its most frequent artists.” | `playlists` lists owned and saved playlists. `playlist` returns tracks and per-page statistics. Follow `next_offset` while `more` is true. |
-| “Download that recording to my Music folder.” | `download` needs a track ID and an absolute output directory. Availability depends on the account and track. Existing files are preserved. |
-| “Convert this NCM file into my selected output directory.” | `convert_ncm` needs absolute input and output paths and [ncmdump](https://github.com/taurusxin/ncmdump/releases) on PATH or at `NCMDUMP_PATH`. It preserves the source and extracts its native MP3 or FLAC audio. |
-| “Sign out of the music server.” | `logout` removes the saved local session. |
+| Show today's recommendations in order, with artist names. | `daily` |
+| Read every page of my commute playlist. Which five artists appear most often? | `playlists`, `playlist` |
+| Find the version of Ten Years on Black, White & Grey and download it to `D:\Music` | `search`, `download` |
+| Convert `D:\Music\demo.ncm` → `D:\Music\Converted` | `convert_ncm` |
 
-## Local data and development
+Downloads require permission for the selected track. For NCM conversion, install [ncmdump](https://github.com/taurusxin/ncmdump/releases) on PATH or set `NCMDUMP_PATH` to the executable. The output retains the original MP3 or FLAC encoding and the source file stays in place.
 
-Session data defaults to `~/.netease-music-plugin`. Set `NETEASE_STATE_DIR` to choose a private directory. Windows encrypts the session with the current user's DPAPI key. Other platforms restrict session file permissions to its owner. QR images also reside in the state directory.
+## Session storage and development
 
-The MCP entry point and implementation live in `src/`. Run `npm test` for offline tests, including a real stdio client handshake. Run `npm start` to launch the server or `node src/cli.mjs status` to inspect local status. See the [requirements and acceptance criteria (Chinese)](docs/requirements.md) and [MIT license](LICENSE).
+Login tools are `login_qr`, `login_check` and `login_browser`. The session and QR images live in `~/.netease-music-plugin`; set `NETEASE_STATE_DIR` to choose a different private directory. Windows encrypts the session using DPAPI. Other platforms use owner-only file permissions. Use `logout` to clear the saved session.
+
+The stdio entry point is [src/server.mjs](src/server.mjs). Run `npm test` for offline tests, including MCP client discovery. See the [requirements and acceptance criteria (Chinese)](docs/requirements.md) for pagination, download checks and file handling.
